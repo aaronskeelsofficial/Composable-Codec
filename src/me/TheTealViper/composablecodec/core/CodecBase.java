@@ -1,4 +1,4 @@
-package me.TheTealViper.composablecodec;
+package me.TheTealViper.composablecodec.core;
 
 import java.nio.ByteBuffer;
 
@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
  * Codec exists to give instructions to translate external <-> internal primitive
  */
 @SuppressWarnings("unused")
-public class Codec<T> {
+public class CodecBase<T> {
     @FunctionalInterface
     public interface JsonEncoder<T> {
         String encode(T object);
@@ -28,7 +28,7 @@ public class Codec<T> {
     private final JsonDecoder<T> jsonDecoder;
     private final BinaryEncoder<T> binaryEncoder;
     private final BinaryDecoder<T> binaryDecoder;
-    public Codec(
+    public CodecBase(
         JsonEncoder<T> jsonEncoder,
         JsonDecoder<T> jsonDecoder,
         BinaryEncoder<T> binaryEncoder,

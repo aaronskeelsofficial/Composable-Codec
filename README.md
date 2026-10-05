@@ -3,6 +3,18 @@ Hytale is a video game that utilizes a fairly automatic and ease-of-integration 
 
 ---
 
+# V5
+### Mission Statement
+The goal of this iteration was functionally - to make Codecs recursively composable - and aesthetically - to rename FieldInstructionCodecBundle to FICBundle because that first name was way too long what the heck.
+
+### Notes on Architecture
+The only notable change here is what was a singular "Codec" has now been split into `CodecBase` which holds the fundamental behavior of all Codecs and `HierarchicalCodec` which is the actual implementation which allows for composition.
+
+### Concluding Thoughts
+The more I make little changes here to account for this edge case, little changes there to account for this other edge case, the more the code is starting to feel spaghetti. Simultaneously, the more my brain is starting to get scrambled. I have "hacked" together functionality following spur of the moment compulsions/sidequests, but now I should take a step back, re-evaluate the cohesivity of the system as a whole given everything I've changed, and solidify my own understanding of what is actually meant to be happening and if I'm overcomplicating/duplicating things.
+
+---
+
 # V4
 ### Mission Statement
 Conception of intended subsystems has taken place, a bit of refinement regarding functionality (changing architecture to account for "edge" case which was actually extremely common and necessary) has also taken place, and V4 dabbles in making it pretty. If my end goal is to have one place I reference to save/load/modify/retrieve objects, I need to merge Codecs and (the newly renamed) FieldInstructions into one place. Simultaneously, another "edge" case was noticed. If I have `Player.health` and `Player.mana` and BOTH are integers *within a Player*, I can't currently distinguish those two `Field<Player, Integer>`. So my overall solution for addressing both these motivations were to combine Codecs and FieldInstructions into a FieldInstructionCodecBundle, and then associate that with the parent object behind a String key representing the variable name (or technically whatever you please). This is done with a KeyedFICBundleManager
