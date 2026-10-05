@@ -3,6 +3,19 @@ Hytale is a video game that utilizes a fairly automatic and ease-of-integration 
 
 ---
 
+# V2
+## Mission Statement
+With comfort with the builder pattern on some level, it was time to think through the actual architecture. What subtasks are we trying to do? Who/what is going to do them? How do all the subroles tie together? At the end of the day we need the capacity to save/load information as well as inserting into/retrieving from java objects.
+
+## Notes on Architecture
+- Codecs: The role of a codec at this point was decided to be translating "external" data <-> "internal" data. I didn't have a hard definition yet of what that looked like.
+- Field: The role of a field at this point was decided to be translating "internal" data <-> complex object. A complex object would just be a Java object that holds multiple fields of other Java objects.
+
+## Concluding Thoughts
+At this point, I'm really only developing conceptual roles. I'm developing a general flow to the system: external data <-> internal data <-> complex object. The code isn't fully functional as codecs currently do nothing and none of this is composable nor type agnostic, it's not integration friendly as to use any of it looks disgusting and isn't comprehensive, but one step at a time. Conceive, get it functional, then get it pretty. We're in the conception steps.
+
+---
+
 # V1
 ## Mission Statement
 I didn't look too in depth into the Hytale code that inspired me to begin this project in the first place, I just scanned the surface really quick in sample code for other functionality entirely. While scanning, I noticed their codec approach was a compositional builder pattern. The very first thing I wanted to do was construct (from scratch) what I believed a builder pattern might look like. Nothing fancy, just "can I improvise a working builder pattern and what might I think of while working on it".
