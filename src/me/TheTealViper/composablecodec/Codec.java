@@ -2,6 +2,9 @@ package me.TheTealViper.composablecodec;
 
 import java.nio.ByteBuffer;
 
+/*
+ * Codec exists to give instructions to translate external <-> internal primitive
+ */
 @SuppressWarnings("unused")
 public class Codec<T> {
     @FunctionalInterface
