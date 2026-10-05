@@ -3,7 +3,7 @@ Hytale is a video game that utilizes a fairly automatic and ease-of-integration 
 
 ---
 
-# V7
+# V7 - Finalize First Demo
 ### Mission Statement
 The goal here was to no longer limit my simulations to java->json and instead think of json->java as well. This was achieved. V7 is meant to be my first, semi-formalized checkpoint where an intended goal has been met, and whether or not the project extends depends on the creation of a new goal. As such a checkpoint, javadocs have been semi-meticulously typed.
 
@@ -38,7 +38,7 @@ This architecture technically is tech-demo feature complete. It can successfully
 
 ---
 
-# V6
+# V6 - Regroup/Rewrite Java To Json
 ### Mission Statement
 After continuously making spur of the moment fixes for edge cases just to see if functionality conceptually was feasible, that tech debt began to add up. V6 is about rewinding and redeveloping the architecture from the ground up conceptually, making sure all those changes still make sense with regards to the big picture. The goal is to avoid duplicate code, subsystems stepping on the toes of other subsystems, and optimized cohesivity between all working parts. A fully informational architecture reasoning/breakdown header can be found within Main.java with way more information than is present here.
 
@@ -55,7 +55,7 @@ After continuously making spur of the moment fixes for edge cases just to see if
 
 ---
 
-# V5
+# V5 - Codec Composition
 ### Mission Statement
 The goal of this iteration was functionally - to make Codecs recursively composable - and aesthetically - to rename FieldInstructionCodecBundle to FICBundle because that first name was way too long what the heck.
 
@@ -67,7 +67,7 @@ The more I make little changes here to account for this edge case, little change
 
 ---
 
-# V4
+# V4 - Keys and Consolidation
 ### Mission Statement
 Conception of intended subsystems has taken place, a bit of refinement regarding functionality (changing architecture to account for "edge" case which was actually extremely common and necessary) has also taken place, and V4 dabbles in making it pretty. If my end goal is to have one place I reference to save/load/modify/retrieve objects, I need to merge Codecs and (the newly renamed) FieldInstructions into one place. Simultaneously, another "edge" case was noticed. If I have `Player.health` and `Player.mana` and BOTH are integers *within a Player*, I can't currently distinguish those two `Field<Player, Integer>`. So my overall solution for addressing both these motivations were to combine Codecs and FieldInstructions into a FieldInstructionCodecBundle, and then associate that with the parent object behind a String key representing the variable name (or technically whatever you please). This is done with a KeyedFICBundleManager
 
@@ -90,7 +90,7 @@ Codecs still aren't functional nor composable via a builder, though the overall 
 
 ---
 
-# V3
+# V3 - Field Parent/Child Relation
 ### Mission Statement
 After the completion of V2, I realized I had made a crucial error given my end goal. V2 sees codecs acting on a single type AND fields acting on a single type. A codec *can* be associated to a single type because loading that type from external data (assuming it's always json or whatever) will never change. A field *can not* be associated to a single type because you need different ways to load an int for example. If your player has player.health and your items have item.quantity, you can't just have a single field that represents "how to take an integer and put it into a complex java object" since you need to distinguish WHAT complex java object you're putting it into. The goal of this pass was to make a field unique to the parent-child relationship such that player.health and item.quantity are uniquely distinguishable. *(A note from very far future Aaron looking back: In the future we will use "key" as our unique identities and our *`Field`* exist attached TO the parent, so technically I have suspicion we never NEEDED *`Field<Parent, Child>`* and could get by with *`Field<Child>`* as was originally conceived)*
 
@@ -104,7 +104,7 @@ After the completion of V2, I realized I had made a crucial error given my end g
 
 ---
 
-# V2
+# V2 - Role Conception
 ### Mission Statement
 With comfort with the builder pattern on some level, it was time to think through the actual architecture. What subtasks are we trying to do? Who/what is going to do them? How do all the subroles tie together? At the end of the day we need the capacity to save/load information as well as inserting into/retrieving from java objects.
 
@@ -117,7 +117,7 @@ At this point, I'm really only developing conceptual roles. I'm developing a gen
 
 ---
 
-# V1
+# V1 - Builder Pattern Sample
 ### Mission Statement
 I didn't look too in depth into the Hytale code that inspired me to begin this project in the first place, I just scanned the surface really quick in sample code for other functionality entirely. While scanning, I noticed their codec approach was a compositional builder pattern. The very first thing I wanted to do was construct (from scratch) what I believed a builder pattern might look like. Nothing fancy, just "can I improvise a working builder pattern and what might I think of while working on it".
 
