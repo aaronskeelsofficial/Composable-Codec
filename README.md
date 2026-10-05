@@ -3,6 +3,23 @@ Hytale is a video game that utilizes a fairly automatic and ease-of-integration 
 
 ---
 
+# V6
+### Mission Statement
+After continuously making spur of the moment fixes for edge cases just to see if functionality conceptually was feasible, that tech debt began to add up. V6 is about rewinding and redeveloping the architecture from the ground up conceptually, making sure all those changes still make sense with regards to the big picture. The goal is to avoid duplicate code, subsystems stepping on the toes of other subsystems, and optimized cohesivity between all working parts. A fully informational architecture reasoning/breakdown header can be found within Main.java with way more information than is present here.
+
+### Notes on Architecture
+ - `HierarchicalCodec<T>`: Converts from External Data <-> Internal Data of Type T, composed of children codecs for "passing the torch" when coming across child types
+ - `FieldInstruction<P,C>`: Contains instructions to insert/extract C into/from P
+ - `FICBundle<P,C>`: Makes a permanent association between the FieldInstructions for a parent-child and the Codec (one-to-one) for the child type.
+    - This creates, conceptually, a single object that can handle the full chain: External Data <-> Internal Data <-> Parent Object
+ - `FICBundleGroup<P,C>`: Conceptually, the idea is each class would have ONE manager that houses all the FieldInstructions for its fields (which in turn house the necessary children codecs), the codec for itself, and they would all be tied to a "key" which ideally represents the variable name.
+    - Its name says "BundleGroup" and is disgustingly redundant I am sorry. The "bundle" means the FieldInstruction and Codec are together, and the "group" is because there are multiple FICBundles per parent object since there is one per variable. This naming will need to become clearer.
+
+### Concluding Thoughts
+*Commentary by Aaron from the future: This iteration did exactly what I set out to do in it... reinforce that the architecture works* **by simulating taking an existing Java object and imagining turning it into Json** *. I thought through the information I'd need, I thought through the chain of events and the recursive dependencies, and it all made sense. What I failed to simulate at this point was pretty big... it was going the other direction. This current architecture, coded the way it is, in Java specifically, will have some faults when attempting to go JSON -> Java.*
+
+---
+
 # V5
 ### Mission Statement
 The goal of this iteration was functionally - to make Codecs recursively composable - and aesthetically - to rename FieldInstructionCodecBundle to FICBundle because that first name was way too long what the heck.

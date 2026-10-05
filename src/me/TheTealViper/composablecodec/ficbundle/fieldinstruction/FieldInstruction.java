@@ -1,4 +1,4 @@
-package me.TheTealViper.composablecodec;
+package me.TheTealViper.composablecodec.ficbundle.fieldinstruction;
 
 /*
  * FieldInstruction exists to give instructions to get/set a field of the parent object from internal primitive
