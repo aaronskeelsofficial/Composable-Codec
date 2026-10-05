@@ -3,6 +3,20 @@ Hytale is a video game that utilizes a fairly automatic and ease-of-integration 
 
 ---
 
+# V3
+## Mission Statement
+After the completion of V2, I realized I had made a crucial error given my end goal. V2 sees codecs acting on a single type AND fields acting on a single type. A codec *can* be associated to a single type because loading that type from external data (assuming it's always json or whatever) will never change. A field *can not* be associated to a single type because you need different ways to load an int for example. If your player has player.health and your items have item.quantity, you can't just have a single field that represents "how to take an integer and put it into a complex java object" since you need to distinguish WHAT complex java object you're putting it into. The goal of this pass was to make a field unique to the parent-child relationship such that player.health and item.quantity are uniquely distinguishable. *(A note from very far future Aaron looking back: In the future we will use "key" as our unique identities and our *`Field`* exist attached TO the parent, so technically I have suspicion we never NEEDED Field<Parent, Child> and could get by with Field<Child> as was originally conceived)*
+
+## Notes on Architecture
+- Codec<T>: Converts from External Data <-> Internal Data of Type T
+- Field<P,C>: Contains instructions to insert/extract C into/from P
+ - This allows `Player.health` and `Item.quantity` to be distinguishable
+ 
+## Concluding Thoughts
+Codecs still aren't functional yet, but this realization about making `Field`s distinguishable was very crucial. We are slightly transitioning from the "conceive" phase into the "make it functional" phase, at least a little bit.
+
+---
+
 # V2
 ## Mission Statement
 With comfort with the builder pattern on some level, it was time to think through the actual architecture. What subtasks are we trying to do? Who/what is going to do them? How do all the subroles tie together? At the end of the day we need the capacity to save/load information as well as inserting into/retrieving from java objects.

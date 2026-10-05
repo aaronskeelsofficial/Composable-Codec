@@ -1,20 +1,21 @@
 package me.TheTealViper.composablecodec;
 
-public class Field<T> {
+@SuppressWarnings("unused")
+public class Field<PARENTOBJECTTYPE, CHILDDATATYPE> {
 	@FunctionalInterface
-	static interface Getter<T> {
-		T get(Thing thing);
+	public static interface Getter<PARENTOBJECTTYPE, CHILDDATATYPE> {
+		CHILDDATATYPE get(PARENTOBJECTTYPE object);
 	}
 	@FunctionalInterface
-	static interface Setter<T> {
-		void set(Thing thing, T value);
+	public static interface Setter<PARENTOBJECTTYPE, CHILDDATATYPE> {
+		void set(PARENTOBJECTTYPE parent, CHILDDATATYPE data);
 	}
 	
-	public Codec<T> codec;
-	public Getter<T> getter;
-	public Setter<T> setter;
+	private final Codec<CHILDDATATYPE> codec;
+	private final Getter<PARENTOBJECTTYPE, CHILDDATATYPE> getter;
+	private final Setter<PARENTOBJECTTYPE, CHILDDATATYPE> setter;
 	
-	public Field(Codec<T> codec, Getter<T> getter, Setter<T> setter) {
+	public Field(Codec<CHILDDATATYPE> codec, Getter<PARENTOBJECTTYPE, CHILDDATATYPE> getter, Setter<PARENTOBJECTTYPE, CHILDDATATYPE> setter) {
 		this.codec = codec;
 		this.getter = getter;
 		this.setter = setter;
