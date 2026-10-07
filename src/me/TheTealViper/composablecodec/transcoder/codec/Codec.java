@@ -1,5 +1,6 @@
-package me.TheTealViper.composablecodec.transcoderbundle.codec;
+package me.TheTealViper.composablecodec.transcoder.codec;
 
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -9,6 +10,13 @@ import java.util.function.Function;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
+/*
+ * IMPORTANT NOTE ON CODEC ARCHETYPES (Set/List/Array/etc)
+ * Custom code is running in the following classes manually checking the type parameters and forking their behavior accordingly:
+ *  - TranscoderBundleRegistry: Pulling a List<Integer> will actually return Integer
+ *  - TranscoderBundle: The jsonToJava and javaToJson generated handle custom archetypes explicitly
+ */
+
 /**
  * This class answers how we convert to/from java object to/from middleman object prior to raw data (JSON, BSON, Binary, etc)
  *
@@ -17,10 +25,10 @@ import com.google.gson.JsonPrimitive;
 public class Codec<JavaObjectType> {
 	
 	/** What codecs in theory would this one depend on? */
-	private final Map<Class<?>, Codec<?>> children;
+	private final Map<Type, Codec<?>> children;
 	
 	/** The global registry keys are dependent on object type, generics erase this info, what type is this representing? */
-	public final Class<JavaObjectType> javaObjectTypeClass;
+	public final Type javaObjectTypeRuntime;
 	
 	/** How do we convert from java object to json object */
 	public final Function<JavaObjectType, JsonElement> javaToJson;
@@ -44,20 +52,20 @@ public class Codec<JavaObjectType> {
 	 * @param byteBufferToJava The byte buffer to java converter
 	 */
 	public Codec(
-			Class<JavaObjectType> javaObjectTypeClass,
+			Type javaObjectTypeRuntime,
 			Function<JavaObjectType, JsonElement> javaToJson,
 			Function<JsonElement, JavaObjectType> jsonToJava,
 			Function<JavaObjectType, ByteBuffer> javaToByteBuffer,
 			Function<ByteBuffer, JavaObjectType> byteBufferToJava
     ) {
-		this.javaObjectTypeClass = javaObjectTypeClass;
+		this.javaObjectTypeRuntime = javaObjectTypeRuntime;
         this.javaToJson = javaToJson;
         this.jsonToJava = jsonToJava;
         this.javaToByteBuffer = javaToByteBuffer;
         this.byteBufferToJava = byteBufferToJava;
         children = new HashMap<>();
         //Register in global registry
-        CodecRegistry.getGlobalRegistry().set(javaObjectTypeClass, this);
+        CodecRegistry.getGlobalRegistry().set(javaObjectTypeRuntime, this);
     }
 	
 	/**
@@ -67,7 +75,7 @@ public class Codec<JavaObjectType> {
 	 * @return Modified codec
 	 */
 	public Codec<JavaObjectType> addChild(Codec<?> codec) {
-		children.put(codec.javaObjectTypeClass, codec);
+		children.put(codec.javaObjectTypeRuntime, codec);
 		return this;
 	}
 	
@@ -91,9 +99,10 @@ public class Codec<JavaObjectType> {
 	 */
 	public Codec<JavaObjectType> replaceOrInsertChild(Codec<?> original, Codec<?> replacement) {
 		children.values().remove(original);
-		children.put(replacement.javaObjectTypeClass, replacement);
+		children.put(replacement.javaObjectTypeRuntime, replacement);
 		return this;
 	}
+	
 	
 	
 	

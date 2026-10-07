@@ -4,15 +4,12 @@ import me.TheTealViper.composablecodec.transcoder.FieldTranscoder;
 import me.TheTealViper.composablecodec.transcoder.archetype.ObjectTranscoder;
 import me.TheTealViper.composablecodec.transcoder.archetype.PrimitiveTranscoder;
 
-/**
- * Sample class demonstrating how architecture works.
- */
-public class Stats {
-	public int damage;
-	public int durability;
+public class Enchantment {
+	public String name;
+	public int level;
 	
 	/** The bundle containing all information necessary to save/load/insert/retrieve data from this object. */
-	public static ObjectTranscoder<Stats> BUNDLE;
+	public static ObjectTranscoder<Enchantment> BUNDLE;
 	
 	/**
 	 * This function creates the transcoder bundle, adds all child parameters to it, registers it to the
@@ -23,16 +20,15 @@ public class Stats {
 	 * @return the transcoder bundle created
 	 */
 	public static ObjectTranscoder<?> registerTranscoderBundle() {
-		return BUNDLE = (ObjectTranscoder<Stats>) new ObjectTranscoder<>(Stats.class, Stats::new)
-				.set("damage", new FieldTranscoder<>("damage",
-						(x) -> x.damage,
-						(x,y) -> x.damage = y,
-						PrimitiveTranscoder.INTEGER()))
-				.set("durability", new FieldTranscoder<>("durability",
-						(x) -> x.durability,
-						(x,y) -> x.durability = y,
+		return BUNDLE = (ObjectTranscoder<Enchantment>) new ObjectTranscoder<>(Enchantment.class, Enchantment::new)
+				.set("name", new FieldTranscoder<>("name",
+						(x) -> x.name,
+						(x,y) -> x.name = y,
+						PrimitiveTranscoder.STRING()))
+				.set("level", new FieldTranscoder<>("level",
+						(x) -> x.level,
+						(x,y) -> x.level = y,
 						PrimitiveTranscoder.INTEGER()))
 				.buildCodec();
 	}
-	
 }

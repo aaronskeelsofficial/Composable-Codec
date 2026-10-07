@@ -1,18 +1,20 @@
 package me.TheTealViper.composablecodec.exampleitem;
 
-import me.TheTealViper.composablecodec.transcoderbundle.FieldTranscoder;
-import me.TheTealViper.composablecodec.transcoderbundle.TranscoderBundle;
-import me.TheTealViper.composablecodec.transcoderbundle.TranscoderBundleRegistry;
-import me.TheTealViper.composablecodec.transcoderbundle.fieldinstruction.FieldInstruction;
+import java.util.List;
+
+import me.TheTealViper.composablecodec.transcoder.FieldTranscoder;
+import me.TheTealViper.composablecodec.transcoder.archetype.ListTranscoder;
+import me.TheTealViper.composablecodec.transcoder.archetype.ObjectTranscoder;
 
 /**
  * Sample class demonstrating how architecture works.
  */
 public class Weapon{
 	public Stats stats;
+	public List<Double> killmetadata;
 	
 	/** The bundle containing all information necessary to save/load/insert/retrieve data from this object. */
-	public static TranscoderBundle<Weapon> BUNDLE;
+	public static ObjectTranscoder<Weapon> BUNDLE;
 	
 	/**
 	 * This function creates the transcoder bundle, adds all child parameters to it, registers it to the
@@ -22,13 +24,16 @@ public class Weapon{
 	 *
 	 * @return the transcoder bundle created
 	 */
-	public static TranscoderBundle<?> registerTranscoderBundle() {
-		return BUNDLE = new TranscoderBundle<>(Weapon.class, Weapon::new)
+	public static ObjectTranscoder<?> registerTranscoderBundle() {
+		return BUNDLE = (ObjectTranscoder<Weapon>) new ObjectTranscoder<>(Weapon.class, Weapon::new)
 				.set("stats", new FieldTranscoder<>("stats",
-						new FieldInstruction<>(
-								(x) -> x.stats,
-								(x,y) -> x.stats = y),
-						TranscoderBundleRegistry.getGlobalRegistry().get(Stats.class)))
+						(x) -> x.stats,
+						(x,y) -> x.stats = y,
+						Stats.BUNDLE))
+				.set("killmetadata", new FieldTranscoder<>("killmetadata",
+						(x) -> x.killmetadata,
+						(x,y) -> x.killmetadata = y,
+						new ListTranscoder<>(Double.class)))
 				.buildCodec();
 	}
 	
