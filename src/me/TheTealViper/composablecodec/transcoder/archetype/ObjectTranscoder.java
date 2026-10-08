@@ -3,6 +3,7 @@ package me.TheTealViper.composablecodec.transcoder.archetype;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -12,6 +13,7 @@ import com.google.gson.JsonObject;
 import me.TheTealViper.composablecodec.transcoder.BaseTranscoder;
 import me.TheTealViper.composablecodec.transcoder.FieldTranscoder;
 import me.TheTealViper.composablecodec.transcoder.codec.Codec;
+import me.TheTealViper.composablecodec.transcoder.codec.CodecRegistry;
 
 /**
  * An ObjectTranscoder is meant to represent the entirety of transcoders necessary to construct a java object
@@ -25,11 +27,11 @@ import me.TheTealViper.composablecodec.transcoder.codec.Codec;
  * @param <JavaObjectType> the generic type
  */
 public class ObjectTranscoder<JavaObjectType> extends BaseTranscoder<JavaObjectType>{
-	private static final Map<Type, ObjectTranscoder<?>> globalRegistryMap = new HashMap<>();
-	@SuppressWarnings("unchecked")
-	public static <T> ObjectTranscoder<T> getTranscoderOfType(Type T) {
-		return (ObjectTranscoder<T>) globalRegistryMap.get(T);
-	}
+	
+	/** How do we make a new instance of our parent java object? */
+	public Supplier<JavaObjectType> constructor;
+	/** What transcoders does this bundle require to understand/reconstruct its children? */
+	public final Map<String, FieldTranscoder<JavaObjectType,?>> constituents; //key, fieldtranscoder
 	
 	/**
 	 * Instantiates a new transcoder bundle.
@@ -38,9 +40,52 @@ public class ObjectTranscoder<JavaObjectType> extends BaseTranscoder<JavaObjectT
 	 * @param constructor the constructor lambda
 	 */
 	public ObjectTranscoder(Type javaObjectTypeRuntime, Supplier<JavaObjectType> constructor) {
-		super(javaObjectTypeRuntime, constructor);
-		//Register in global registry
-		globalRegistryMap.put(javaObjectTypeRuntime, this);
+		super(javaObjectTypeRuntime);
+		this.constructor = constructor;
+		this.constituents = new HashMap<>();
+	}
+	
+	/**
+	 * Sets the key-transcoder association.
+	 *
+	 * @param key the key
+	 * @param transcoder the fieldtranscoder
+	 * @return Modified transcoder
+	 */
+	public ObjectTranscoder<JavaObjectType> set(String key, FieldTranscoder<JavaObjectType, ?> transcoder) {
+		transcoder.key = key;
+		constituents.put(key, transcoder);
+		return this;
+	}
+	
+	/**
+	 * Removes the fieldtranscoder with the key.
+	 *
+	 * @param key the key
+	 * @return Modified transcoder
+	 */
+	public ObjectTranscoder<JavaObjectType> remove(String key) {
+		constituents.remove(key);
+		return this;
+	}
+	
+	/**
+	 * Gets the fieldtranscoder with the key.
+	 *
+	 * @param key the key
+	 * @return Modified transcoder
+	 */
+	public FieldTranscoder<JavaObjectType, ?> get(String key) {
+		return constituents.get(key);
+	}
+	
+	/**
+	 * Gets the keys of all the fieldtranscoders.
+	 *
+	 * @return the keys
+	 */
+	public Set<String> getKeys() {
+		return constituents.keySet();
 	}
 	
 	/**
@@ -50,6 +95,7 @@ public class ObjectTranscoder<JavaObjectType> extends BaseTranscoder<JavaObjectT
 	 * @return java to json lambda
 	 */
 	@SuppressWarnings("unchecked")
+	@Override
 	public Function<JavaObjectType,JsonElement> generateJavaToJson() {
 		/*
 		 * 1. Loop through keys
@@ -79,6 +125,7 @@ public class ObjectTranscoder<JavaObjectType> extends BaseTranscoder<JavaObjectT
 	 * @return json to java lambda
 	 */
 	@SuppressWarnings("unchecked")
+	@Override
 	public Function<JsonElement,JavaObjectType> generateJsonToJava() {
 		/*
 		 * 1. Loop through keys
@@ -100,16 +147,20 @@ public class ObjectTranscoder<JavaObjectType> extends BaseTranscoder<JavaObjectT
 
 	@Override
 	public BaseTranscoder<JavaObjectType> buildCodec() {
-		Codec<JavaObjectType> c = new Codec<JavaObjectType>(
-				javaObjectTypeRuntime,
-				generateJavaToJson(),
-				generateJsonToJava(),
-				null,
-				null);
-			this.codec = c;
-			return this;
-		}
-	
-	
+		@SuppressWarnings("unchecked")
+		Codec<JavaObjectType> c = (Codec<JavaObjectType>) CodecRegistry.getGlobalRegistry().getIfExists(javaObjectTypeRuntime);
+		c = c != null ? c : new Codec<JavaObjectType>(
+			javaObjectTypeRuntime,
+			generateJavaToJson(),
+			generateJsonToJava(),
+			null,
+			null);
+		this.codec = c;
+		return this;
+	}
+
+	public static <T> BaseTranscoder<T> getTranscoderOfType(Type t) {
+		return BaseTranscoder.staticGetTranscoderOfType(t);
+	}
 
 }

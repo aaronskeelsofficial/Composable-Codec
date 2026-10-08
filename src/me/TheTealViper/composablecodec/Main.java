@@ -127,18 +127,29 @@ public class Main {
 			e.put(en.name, en);
 		}).run();
 		p.enchantments = e;
+		List<List<String>> lls = new ArrayList<>();
+		lls.add(new ArrayList<>(List.of("1","2","3")));
+		lls.add(new ArrayList<>(List.of("a","b","c")));
+		lls.add(new ArrayList<>(List.of("do","re","mi")));
+		p.stressTestList = lls;
+		Map<String,List<String>> mls = new HashMap<>();
+		mls.put("foo", new ArrayList<>(List.of("foo","bar","lorem","ipsum")));
+		mls.put("yeet", new ArrayList<>(List.of("yaga","maga","heneesummilk","ruhrohraggy")));
+		p.stressTestMap = mls;
 		
 		//Test recursive entire chain of parent java object -> child objects... -> json object -> json string
-		JsonObject json = (JsonObject) Player.BUNDLE.codec.javaToJson.apply(p);
+		JsonObject json = (JsonObject) Player.TRANSCODER.codec.javaToJson.apply(p);
 		System.out.println("[json]: " + json);
 		
 		//Test recursive entire chain of json string -> json object -> child objects... -> parent java object
 		String st = json.toString();
 		JsonObject json2 = JsonParser.parseString(st).getAsJsonObject();
 		System.out.println("[json2]: " + json2);
-		Player p2 = Player.BUNDLE.codec.jsonToJava.apply(json2);
+		Player p2 = Player.TRANSCODER.codec.jsonToJava.apply(json2);
 		System.out.println(p2.weapon.stats.damage + "," + p2.weapon.stats.durability);
 		System.out.println(p2.backpack.get(2).killmetadata);
 		System.out.println(p2.enchantments.get("superjump").level);
+		System.out.println(p2.stressTestList.getLast());
+		System.out.println(p2.stressTestMap.toString());
 	}
 }

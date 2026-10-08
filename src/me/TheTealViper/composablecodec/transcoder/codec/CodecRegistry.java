@@ -40,7 +40,7 @@ public class CodecRegistry {
 	 * @param c Class c
 	 * @return the codec
 	 */
-	public Codec<?> get(Type t) {
+	public Codec<?> getAndInsistExists(Type t) {
 		Codec<?> codec = map.get(t);
 		if (codec == null) {
 			System.out.println("CodecRegistry::get() ERROR: Desired Codec " + t.toString() + " has not been registered yet, but is attempting to be retrieved.");
@@ -48,6 +48,11 @@ public class CodecRegistry {
 			// Get rid of this syso change to log or throw actual exception
 		}
 		return map.get(t);
+	}
+	
+	public Codec<?> getIfExists(Type t) {
+		Codec<?> codec = map.get(t);
+		return codec;
 	}
 	
 	/**

@@ -2,6 +2,9 @@ package me.TheTealViper.composablecodec.transcoder.archetype;
 
 import me.TheTealViper.composablecodec.transcoder.codec.Codec;
 
+/**
+ * A PrimitiveTranscoder is a prebuilt core transcoder for primitive types
+ */
 public class PrimitiveTranscoder {
 	
 	public static void registerPrimitiveTranscoders() {

@@ -12,7 +12,7 @@ import java.util.function.Function;
 public class FieldTranscoder<ParentObjectType, ChildObjectType> {
 	
 	/** The key which allows us to distinguish between parent fields that happen to have the same child object type. */
-	public final String key;
+	public String key;
 	/** Extract child from parent lambda  */
 	public final Function<ParentObjectType, ChildObjectType> childFromParent;
 	/** Insert child into parent lambda */
@@ -37,6 +37,22 @@ public class FieldTranscoder<ParentObjectType, ChildObjectType> {
 			BaseTranscoder<ChildObjectType> childTranscoder
 	) {
 		this.key = key;
+		this.childFromParent = childFromParent;
+		this.childIntoParent = childIntoParent;
+		this.childTranscoder = childTranscoder;
+	}
+	
+	/**
+	 * Instantiates a new field transcoder WITHOUT assigning a key. This version is ONLY intended to be used in conjunction with an ObjectTranscoder.set() which sets the key.
+	 *
+	 * @param fieldInstruction the field instruction
+	 * @param childBundle the child bundle
+	 */
+	public FieldTranscoder(
+			Function<ParentObjectType, ChildObjectType> childFromParent,
+			BiConsumer<ParentObjectType, ChildObjectType> childIntoParent,
+			BaseTranscoder<ChildObjectType> childTranscoder
+	) {
 		this.childFromParent = childFromParent;
 		this.childIntoParent = childIntoParent;
 		this.childTranscoder = childTranscoder;

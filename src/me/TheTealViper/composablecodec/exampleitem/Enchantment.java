@@ -4,6 +4,9 @@ import me.TheTealViper.composablecodec.transcoder.FieldTranscoder;
 import me.TheTealViper.composablecodec.transcoder.archetype.ObjectTranscoder;
 import me.TheTealViper.composablecodec.transcoder.archetype.PrimitiveTranscoder;
 
+/**
+ * Sample class demonstrating how architecture works.
+ */
 public class Enchantment {
 	public String name;
 	public int level;
@@ -21,11 +24,11 @@ public class Enchantment {
 	 */
 	public static ObjectTranscoder<?> registerTranscoderBundle() {
 		return BUNDLE = (ObjectTranscoder<Enchantment>) new ObjectTranscoder<>(Enchantment.class, Enchantment::new)
-				.set("name", new FieldTranscoder<>("name",
+				.set("name", new FieldTranscoder<>(
 						(x) -> x.name,
 						(x,y) -> x.name = y,
 						PrimitiveTranscoder.STRING()))
-				.set("level", new FieldTranscoder<>("level",
+				.set("level", new FieldTranscoder<>(
 						(x) -> x.level,
 						(x,y) -> x.level = y,
 						PrimitiveTranscoder.INTEGER()))

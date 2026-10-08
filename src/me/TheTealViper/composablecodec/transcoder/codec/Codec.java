@@ -10,13 +10,6 @@ import java.util.function.Function;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
-/*
- * IMPORTANT NOTE ON CODEC ARCHETYPES (Set/List/Array/etc)
- * Custom code is running in the following classes manually checking the type parameters and forking their behavior accordingly:
- *  - TranscoderBundleRegistry: Pulling a List<Integer> will actually return Integer
- *  - TranscoderBundle: The jsonToJava and javaToJson generated handle custom archetypes explicitly
- */
-
 /**
  * This class answers how we convert to/from java object to/from middleman object prior to raw data (JSON, BSON, Binary, etc)
  *

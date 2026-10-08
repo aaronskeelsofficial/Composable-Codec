@@ -1,6 +1,5 @@
 package me.TheTealViper.composablecodec.transcoder.archetype;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +12,30 @@ import com.google.gson.reflect.TypeToken;
 
 import me.TheTealViper.composablecodec.transcoder.BaseTranscoder;
 import me.TheTealViper.composablecodec.transcoder.codec.Codec;
+import me.TheTealViper.composablecodec.transcoder.codec.CodecRegistry;
 
+/**
+ * A ListTranscoder is meant to represent the entirety of transcoders necessary to construct a List of java object
+ * 
+ * The intended workflow is NOT:
+ * 		ListTranscoder<T> bundle = new ListTranscoder<>(T CLASS, T CONSTRUCTOR)
+ * 				.set(...)
+ * 				.set(...)
+ * 				.buildCodec();
+ * The intended workflow IS:
+ * 		ObjectTranscoder<T> bundle = new ObjectTranscoder<>(T CLASS, T CONSTRUCTOR)
+ * 				.set(..., new FieldTranscoder<>(..., new ListTranscoder<>(Integer.class))))
+ * 				.buildCodec();
+ * ListTranscoders are NOT meant to ever be the outermost layer of a codec, they are meant to represent an implementation that builds off an ObjectTranscoder for a type
+ *
+ * @param <JavaObjectType> the generic type
+ */
 public class ListTranscoder<JavaObjectType> extends BaseTranscoder<List<JavaObjectType>> {
+	
+	/** How do we make a new instance of our parent java object? */
+	public Supplier<List<JavaObjectType>> constructor;
+	/** How do we work with each element of the list's data? */
+	public BaseTranscoder<JavaObjectType> elemTranscoder;
 	
 	/**
 	 * Instantiates a new transcoder representing a list type of data.
@@ -22,11 +43,17 @@ public class ListTranscoder<JavaObjectType> extends BaseTranscoder<List<JavaObje
 	 * @param javaObjectTypeClass the java object type class
 	 * @param constructor the constructor lambda
 	 */
-	public ListTranscoder(Type javaObjectTypeRuntime) {
+	public ListTranscoder(Type elemTypeRuntime) {
+		this(staticGetTranscoderOfType(elemTypeRuntime));
+	}
+	
+	public ListTranscoder(BaseTranscoder<JavaObjectType> elemTranscoder) {
 		Supplier<List<JavaObjectType>> constructor = () -> {
 			return new ArrayList<>();
 		};
-		super(TypeToken.getParameterized(List.class, javaObjectTypeRuntime).getType(), constructor);
+		super(TypeToken.getParameterized(List.class, elemTranscoder.javaObjectTypeRuntime).getType());
+		this.constructor = constructor;
+		this.elemTranscoder = elemTranscoder;
 		buildCodec();
 	}
 	
@@ -40,9 +67,8 @@ public class ListTranscoder<JavaObjectType> extends BaseTranscoder<List<JavaObje
 	public Function<List<JavaObjectType>,JsonElement> generateJavaToJson() {
 		return (javaObject) -> {
 			JsonArray jsonArr = new JsonArray();
-			Type parameterType = ((ParameterizedType) javaObjectTypeRuntime).getActualTypeArguments()[0];
 			for (JavaObjectType elem : javaObject) {
-					JsonElement childJson = ObjectTranscoder.getTranscoderOfType(parameterType).codec.javaToJson.apply(elem);
+					JsonElement childJson = elemTranscoder.codec.javaToJson.apply(elem);
 					jsonArr.add(childJson);
 			}
 			return jsonArr;
@@ -56,15 +82,13 @@ public class ListTranscoder<JavaObjectType> extends BaseTranscoder<List<JavaObje
 	 *
 	 * @return json to java lambda
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public Function<JsonElement,List<JavaObjectType>> generateJsonToJava() {
 		return (json) -> {
 			List<JavaObjectType> javaObject = constructor.get();
 			JsonArray jsonArr = json.getAsJsonArray();
-			Type parameterType = ((ParameterizedType) javaObjectTypeRuntime).getActualTypeArguments()[0];
 			for (JsonElement childJson : jsonArr) {
-				JavaObjectType child = (JavaObjectType) ObjectTranscoder.getTranscoderOfType(parameterType).codec.jsonToJava.apply(childJson);
+				JavaObjectType child = elemTranscoder.codec.jsonToJava.apply(childJson);
 				javaObject.add(child);
 			}
 			return javaObject;
@@ -73,7 +97,9 @@ public class ListTranscoder<JavaObjectType> extends BaseTranscoder<List<JavaObje
 
 	@Override
 	public BaseTranscoder<List<JavaObjectType>> buildCodec() {
-		Codec<List<JavaObjectType>> c = new Codec<List<JavaObjectType>>(
+		@SuppressWarnings("unchecked")
+		Codec<List<JavaObjectType>> c = (Codec<List<JavaObjectType>>) CodecRegistry.getGlobalRegistry().getIfExists(javaObjectTypeRuntime);
+		c = c != null ? c : new Codec<List<JavaObjectType>>(
 			javaObjectTypeRuntime,
 			generateJavaToJson(),
 			generateJsonToJava(),
@@ -81,5 +107,9 @@ public class ListTranscoder<JavaObjectType> extends BaseTranscoder<List<JavaObje
 			null);
 		this.codec = c;
 		return this;
+	}
+	
+	public static <T> BaseTranscoder<List<T>> getTranscoderOfType(Type t) {
+		return BaseTranscoder.staticGetTranscoderOfType(TypeToken.getParameterized(List.class, t).getType());
 	}
 }
