@@ -1,5 +1,6 @@
-package me.TheTealViper.composablecodec.transcoderbundle.codec;
+package me.TheTealViper.composablecodec.transcoder.codec;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -13,7 +14,7 @@ public class CodecRegistry {
 	private static CodecRegistry globalsingleton = null;
 	
 	/** The map. */
-	private final Map<Class<?>, Codec<?>> map;
+	private final Map<Type, Codec<?>> map;
 	
 	/**
 	 * Instantiates a new codec registry.
@@ -39,38 +40,43 @@ public class CodecRegistry {
 	 * @param c Class c
 	 * @return the codec
 	 */
-	public Codec<?> get(Class<?> c) {
-		Codec<?> codec = map.get(c);
+	public Codec<?> getAndInsistExists(Type t) {
+		Codec<?> codec = map.get(t);
 		if (codec == null) {
-			System.out.println("CodecRegistry::get() ERROR: Desired Codec " + c.getName() + " has not been registered yet, but is attempting to be retrieved.");
+			System.out.println("CodecRegistry::get() ERROR: Desired Codec " + t.toString() + " has not been registered yet, but is attempting to be retrieved.");
 			//TODO
 			// Get rid of this syso change to log or throw actual exception
 		}
-		return map.get(c);
+		return map.get(t);
+	}
+	
+	public Codec<?> getIfExists(Type t) {
+		Codec<?> codec = map.get(t);
+		return codec;
 	}
 	
 	/**
 	 * Assigns the class-codec relationship.
 	 *
-	 * @param c Class c
+	 * @param t Type t
 	 * @param codec the codec
 	 */
-	public void set(Class<?> c, Codec<?> codec) {
-		if (map.containsKey(c)) {
-			System.out.println("CodecRegistry::set() ERROR: Attempted to add a codec with a class key already in existence.");
+	public void set(Type t, Codec<?> codec) {
+		if (map.containsKey(t)) {
+			System.out.println("CodecRegistry::set() ERROR: Attempted to add a codec with a type key already in existence '" + t.toString() + "'.");
 			//TODO
 			// Get rid of this syso change to log or throw actual exception
 			return;
 		}
-		map.put(c, codec);
+		map.put(t, codec);
 	}
 	
 	/**
-	 * Gets all registered classes. This was primarily added for debugging registration order bugs prior to switching away from static approaches.
+	 * Gets all registered types. This was primarily added for debugging registration order bugs prior to switching away from static approaches.
 	 *
-	 * @return the registered classes
+	 * @return the registered types
 	 */
-	public Set<Class<?>> getRegisteredClasses() {
+	public Set<Type> getRegisteredTypes() {
 		return map.keySet();
 	}
 }
